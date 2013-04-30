@@ -1,9 +1,12 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include  "../def.h"
+#include"lecture_fichier.h"
+#include"trait_cmd.h"
+
 
 #define TAILLE 11
-#define MAUVAIS_RES "x"
 enum direction{NW=1, NE=2, E=3, SE=4, SW=5, W=6, ERR=7};
 
 /*
@@ -21,7 +24,7 @@ int verifie_cmd(char * cmd, int len){
   for(n=0; n<3; n++){
  
 
-    if(!(cmd[indice]<='i' && cmd[indice]>='a'&& cmd[indice+1]<='9' && cmd[indice+1] >='1')){
+    if(!(cmd[indice]<='I' && cmd[indice]>='A'&& cmd[indice+1]<='9' && cmd[indice+1] >='1')){
       printf("rate a %d %d n= %d\n", cmd[indice], cmd[indice+1],n);
       fprintf(stderr, "mauvaise cmd %s", cmd);
       return 1;
@@ -64,12 +67,14 @@ int verifie_cmd(char * cmd, int len){
 
 
 
-int dir_mvt(char * cmd, int len){
-  
+int dir_mvt(char * cmd){
+int len = strlen(cmd);
+ len+=1;
     char d_1 = cmd[0];
     char d_2 = cmd[1];
     char f_1;
     char f_2;
+    printf("len dans dir_mvt est: %d\n", len);
    switch(len){
    case 6:
    case 7:
@@ -82,7 +87,7 @@ int dir_mvt(char * cmd, int len){
     f_2 = cmd[7];
     break;
    }
-   //  printf("d_1 = %d; d_2 = %d; f_1 = %d; f_2 = %d\n", d_1, d_2, f_1, f_2);
+     printf("d_1 = %d; d_2 = %d; f_1 = %d; f_2 = %d\n", d_1, d_2, f_1, f_2);
   int diff_1 = f_1 - d_1;
   int diff_2 = f_2 - d_2;
   int dir = direction(diff_1, diff_2);
@@ -142,9 +147,12 @@ int direction(int diff_1, int diff_2){
 }
 
 
-char* trait_cmd( char * cmd){
+int valide_cmd(char * cmd){
+
+  int res=0; //0 en cas reussi, 1 en case echoue
   int len = strlen(cmd);
-  char * resultat = malloc(TAILLE * 
+  len+=1;
+  printf("len cmd = %d\n cmd = %s\n", len,cmd);
   switch(len){
   case 6:
   case 7:
@@ -152,25 +160,54 @@ char* trait_cmd( char * cmd){
   case 10:
     
     if(verifie_cmd(cmd, len)==0){
-     
-      printf("commande est syntaxiquement valide!\n");
-      int dir = dir_mvt(cmd, len);
+      fprintf(stdout,"commande est syntaxiquement valide!\n");
+      
+      int dir = dir_mvt(cmd);
       if(dir == ERR){
-	printf("mouvement pas possible!\n");
+	fprintf(stderr,"mouvement pas possible!\n");
       }
       else{
+	fprintf(stdout, "command et dir sont valides.\n");
 	break;
       }
     }
   default:
     printf("mauvaise entree de la cmd: %s Reessayez:\n", cmd);
-    resultat = MAUVAIS_RES;
-    return resultat;
+    res = 1;
+    return res;
   }
   
-  return 
+  return res;
 }
 
+cercle_t*  recupere_cercle(char *cmd, jeux_t jeux){
+  cercle_t c;
+  int len = strlen(cmd);
+  len+=1;
+  cercle_t* cercles = malloc(sizeof(cercle_t) * 3);
+  char * nom;
+  switch(len){
+  case 6:
+  case 7:
+    printf("entre recupere cercle\n");
+    c = malloc(sizeof(struct cercle_s));
+    nom =malloc(sizeof(char) * 3);
+    nom = strncpy(nom, cmd, 2);
+    printf("nom est : %s\n", nom);
+    c = nom_to_bille(nom, jeux);
+    afficheCercle(c);
+    cercles[0] = c;
+    return cercles;
+    break;
+  case 9:
+  case 10:
+    ////....//
+    break;
+  default:
+    fprintf(stderr, "taille inconnue.\n");
+  }
+  return cercles;
+}
 
 /* int main(int argc, char * argv[]){ */
   
@@ -201,13 +238,9 @@ char* trait_cmd( char * cmd){
 /*     } */
    
 
-/*   } */
-   
-
-
+/*   }} */
   
-   
-}
+
  
 
   
