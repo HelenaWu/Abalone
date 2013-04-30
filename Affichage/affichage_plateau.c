@@ -1,28 +1,23 @@
 #include<stdio.h>
-#include "def.h"
-
-void affichage_plateau(cercle[9][9]tab){
-  int k,i=8;
-char [9] lettre={'I','H','F','G','E','D'};
-//int [3] chiffre={9,8,7};
-
-printf("%s\n","---------");
-
- for(k=0;k<6;k++){
-   for(j=0;j<8;j++)
-   
-printf("%c %s %s\n",lettre[k] "/" tab[i][j]);
- i--;
- }
-
-printf("%s %s %s\n", "c/" tab[j][] "/9");
-printf("%s %s %s\n","B /" tab[j][] "/ 8");
-printf("%s %s %s\n","A /" tab[j][] "/ 7");
+#include "../def.h"
+#include "../Analyse/lecture_fichier.h"
+#include "affichage_plateau.h" 
 
 
-printf("%s\n","---------  6");
-printf("%s\n"," 1 2 3 4 5");
+#define NOMBRE_CERCLES 61
+
+void affichage_plateau(jeux_t jeux){
+  cercle_t * plateau = jeux->plateau;
+  printf("       ---------    \n");
+  printf("     I/%c%c%c%c%c\   \n",nc(plateau, "I5"), nc(plateau, "I6"),nc(plateau, "I7"),nc(plateau, "I8"),nc(plateau, "I9") );
+
 }
 
+char nc (cercle_t * plateau, char* nom){
+  char res;
+  int indice = hash_nom(nom[0], nom[1], NOMBRE_CERCLES);
+  res = plateau[indice]->suivant->couleur;
+  return res;
 
 
+}
