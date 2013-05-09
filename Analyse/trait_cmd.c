@@ -25,7 +25,9 @@ int verifie_cmd(char * cmd, int len){
  
 
     if(!(cmd[indice]<='I' && cmd[indice]>='A'&& cmd[indice+1]<='9' && cmd[indice+1] >='1')){
-      printf("rate a %d %d n= %d\n", cmd[indice], cmd[indice+1],n);
+      
+      // printf("rate a %d %d n= %d\n", cmd[indice], cmd[indice+1],n);
+      
       fprintf(stderr, "mauvaise cmd %s", cmd);
       return 1;
     }
@@ -69,12 +71,12 @@ int verifie_cmd(char * cmd, int len){
 
 int dir_mvt(char * cmd){
 int len = strlen(cmd);
- len+=1;
+
     char d_1 = cmd[0];
     char d_2 = cmd[1];
     char f_1;
     char f_2;
-    printf("len dans dir_mvt est: %d\n", len);
+    // printf("len dans dir_mvt est: %d\n", len);
    switch(len){
    case 6:
    case 7:
@@ -87,7 +89,7 @@ int len = strlen(cmd);
     f_2 = cmd[7];
     break;
    }
-     printf("d_1 = %d; d_2 = %d; f_1 = %d; f_2 = %d\n", d_1, d_2, f_1, f_2);
+   // printf("d_1 = %d; d_2 = %d; f_1 = %d; f_2 = %d\n", d_1, d_2, f_1, f_2);
   int diff_1 = f_1 - d_1;
   int diff_2 = f_2 - d_2;
   int dir = direction(diff_1, diff_2);
@@ -97,7 +99,7 @@ int len = strlen(cmd);
 
 int direction(int diff_1, int diff_2){
   int dir;
-  printf("diff-1 = %d, diff-2= %d\n",diff_1, diff_2);
+  // printf("diff-1 = %d, diff-2= %d\n",diff_1, diff_2);
   switch(diff_1){
   case 1:
     switch(diff_2){
@@ -151,8 +153,8 @@ int valide_cmd(char * cmd){
 
   int res=0; //0 en cas reussi, 1 en case echoue
   int len = strlen(cmd);
-  len+=1;
-  printf("len cmd = %d\n cmd = %s\n", len,cmd);
+  //  printf("len cmd = %d\n cmd = %s\n", len,cmd);
+  
   switch(len){
   case 6:
   case 7:
@@ -183,20 +185,23 @@ int valide_cmd(char * cmd){
 cercle_t*  recupere_cercle(char *cmd, jeux_t jeux){
   cercle_t c;
   int len = strlen(cmd);
-  len+=1;
+
   cercle_t* cercles = malloc(sizeof(cercle_t) * 3);
   char * nom;
   switch(len){
   case 6:
   case 7:
-    printf("entre recupere cercle\n");
+     
     c = malloc(sizeof(struct cercle_s));
     nom =malloc(sizeof(char) * 3);
     nom = strncpy(nom, cmd, 2);
-    printf("nom est : %s\n", nom);
+    
+    //printf("nom est : %s\n", nom);
+    
     c = nom_to_bille(nom, jeux);
     afficheCercle(c);
     cercles[0] = c;
+    cercles[1] = NULL;
     return cercles;
     break;
   case 9:

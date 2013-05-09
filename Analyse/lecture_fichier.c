@@ -60,10 +60,10 @@ table_de_hachage_t construire_tab_hachage(FILE * f){
   char * s = malloc(BUF_TAILLE*sizeof(char));
   regle_t regle;
   
-  table_de_hachage_t hash = malloc(sizeof(struct table_de_hachage_s));
+  table_de_hachage_t table = malloc(sizeof(struct table_de_hachage_s));
   liste_t * tableau = malloc(NOMBRE_REGLES * sizeof(struct liste_s));
-  hash->taille = NOMBRE_REGLES;
-  hash->tableau = tableau;
+  table->taille = NOMBRE_REGLES;
+  table->tableau = tableau;
 
   
   s=fgets(s, BUF_TAILLE,f);
@@ -74,11 +74,11 @@ table_de_hachage_t construire_tab_hachage(FILE * f){
     char cle = c;
     s = fgets(s,BUF_TAILLE,f);
     regle = traduire_direction(s,(cle -'0'));
-    insere(hash, cle, regle);
+    insere(table, cle, regle);
     c = fgetc(f);
     
   }
-  return hash;
+  return table;
 }
 
 regle_t trouver_regle(char cle, table_de_hachage_t table){
@@ -119,33 +119,41 @@ void afficheCercle(cercle_t c){
 }
 
 jeux_t init_plateau(FILE *tab_bille, FILE* tab_regle, FILE* tab_nom, table_de_hachage_t table){
-  char * s;
+
+
+  
+
+  char * s = malloc(BUF_TAILLE);;
   char c1, c2,c3,c4; //c1 => char depuis tab_bille, char depuis tab_regle, c3 depuis tab_nom
 
   char joueur_debut;
   int c_blanc, c_noir;
   jeux_t jeux = malloc(sizeof(struct jeux_s));
  
-  // cercle_t cercle = malloc (sizeof(struct cercle_s));
+ 
   cercle_t cercle;
 
 
   cercle_t * plateau = malloc(sizeof(struct cercle_s) * NOMBRE_CERCLES);
   int indice = 0;
-  
+
   s = fgets(s, BUF_TAILLE, tab_bille);
+  
   joueur_debut = s[0];
-  c_blanc = s[1]-'0';
+  c_blanc =s[1]-'0';
   c_noir = s[2]-'0';
   jeux->joueur = joueur_debut;
+
+
+
   jeux->c_blanc = c_blanc;
   jeux->c_noir = c_noir;
 
   
+
   liste_nom_t * table_hachage_nom = malloc(sizeof(liste_nom_t)*NOMBRE_CERCLES);
   while((c1=fgetc(tab_bille)) != EOF && (c2=fgetc(tab_regle)) !=EOF && (c3 = fgetc(tab_nom))!=EOF){
-   
-
+       
      if(c1 == '*' || c2 == '0' || c1 == '\n' || c2 == '\n'){
        continue;
     }
@@ -169,23 +177,27 @@ jeux_t init_plateau(FILE *tab_bille, FILE* tab_regle, FILE* tab_nom, table_de_ha
     ele->suivant = table_hachage_nom[hash];
     table_hachage_nom[hash] = ele;
     
-    
+   
     plateau[indice] = cercle;
- 
-    //tester + affichage...
-    // afficheCercle(cercle);
-    //
+    
     indice++;
   }
   c1=fgetc(tab_bille);
   c2=fgetc(tab_regle);
+
   if(c1 != EOF || c2 != EOF){
     perror("mauvais correspondance entre fichiers de configuration.\n");
     exit(1);
   }
+
+ 
+  
   jeux->hash_nom = table_hachage_nom;
   jeux->plateau = plateau;
+  
 
+  
+  
   return jeux;
   
 }
@@ -197,61 +209,92 @@ int hash_nom(char c3, char c4, int taille){
 
 
 cercle_t nom_to_bille(char * nom, jeux_t jeux){
-  int indice = jeux->hash_nom[hash_nom(nom[0],nom[1],NOMBRE_CERCLES)]->indice;
-
-  
-  return jeux->plateau[indice];
-}
-
-
-
-int main (int argc, char * argv[]){
-  FILE *f1 = fopen(argv[1], "r"); //regle_ref
-  int i;
-  table_de_hachage_t table = malloc(sizeof(struct table_de_hachage_s));
-  
-  table = construire_tab_hachage(f1);
-  
-  regle_t reg = trouver_regle('0',table);
-
-  FILE *tab_bille = fopen(argv[2],"r");
-  FILE * tab_regle = fopen(argv[3],"r");
-  FILE * tab_nom = fopen(argv[4],"r");
-
-
-  jeux_t monJeux;
-  
-  monJeux = init_plateau(tab_bille, tab_regle,tab_nom, table);
-  
-  affichage_plateau(monJeux);
-  
-  /* char * testString = "A3"; */
-  
-  /* int indice = monJeux->hash_nom[hash_nom(testString[0],testString[1],NOMBRE_CERCLES)]->indice; */
-  /* afficheCercle(monJeux->plateau[indice]); */
-
-
-  //**=======trait cmd + compute =======**//
-  char * cmd = malloc(200* sizeof(char));
-  cmd  = argv[5];
-  int * resultat = malloc(sizeof(int) * 6);  
-  if(valide_cmd(cmd)==0){
-    cercle_t * cercles =  recupere_cercle(cmd, monJeux);
-
-    int dir = dir_mvt(cmd);
-    resultat = verifie_coup(resultat,cercles,dir, monJeux);
-    resultat[0] = 0;
-    resultat[1] = 0;
-    //resultat[4] if ==1 , error code recommence ???
-    resultat[5] = 0;
-    
-
+  liste_nom_t tmp_l =jeux->hash_nom[hash_nom(nom[0],nom[1], NOMBRE_CERCLES)]; 
+  while(strcmp(tmp_l->cle, nom)!=0){
+    tmp_l = tmp_l->suivant;
   }
-
-
-  return 0;
-
+  int indice = tmp_l->indice;
+  
+  return  jeux->plateau[indice] ;
 }
+
+
+
+/* int main (int argc, char * argv[]){ */
+/*   FILE *f1 = fopen(argv[1], "r"); //regle_ref */
+/*   int i; */
+/*   table_de_hachage_t table = malloc(sizeof(struct table_de_hachage_s)); */
+  
+/*   table = construire_tab_hachage(f1); */
+  
+/*   regle_t reg = trouver_regle('0',table); */
+
+/*   FILE *tab_bille = fopen(argv[2],"r"); */
+/*   FILE * tab_regle = fopen(argv[3],"r"); */
+/*   FILE * tab_nom = fopen(argv[4],"r"); */
+
+
+/*   jeux_t monJeux; */
+  
+/*   monJeux = init_plateau(tab_bille, tab_regle,tab_nom, table); */
+  
+/*   affichage_plateau(monJeux); */
+  
+/*   /\* char * testString = "A3"; *\/ */
+  
+/*   /\* int indice = monJeux->hash_nom[hash_nom(testString[0],testString[1],NOMBRE_CERCLES)]->indice; *\/ */
+/*   /\* afficheCercle(monJeux->plateau[indice]); *\/ */
+
+
+/*   //\**=======trait cmd + compute =======**\// */
+/*   char * cmd = malloc(10* sizeof(char)); */
+/*   int* resultat = malloc(sizeof(int*) * 6);   */
+/*   /\*---initialise resultat---*\/ */
+  
+
+/*   for(i=0; i<6; i++){ */
+/*     resultat[i] = 0; */
+/*   } */
+  
+/*   //  FILE *cheat = fopen(argv[5],"r");  */
+/*   while(resultat[2]!=6 || resultat[3] != 6){ */
+/*     printf("entrez votre commande: \n"); */
+/*     cmd  = fgets(cmd, 10, stdin); */
+
+
+/*     printf("cmd est: %s\n", cmd); */
+/*     if(valide_cmd(cmd)==0){ */
+/*       cercle_t * cercles =  recupere_cercle(cmd, monJeux); */
+      
+/*       int dir = dir_mvt(cmd); */
+/*       verifie_coup(resultat,cercles,dir, monJeux); */
+      
+/*      /\* printf("resultat dans main: %d\n", resultat[0]); *\/ */
+/*     /\* printf("resultat dans main: %d\n", resultat[1]); *\/ */
+/*     /\* printf("resultat dans main: %d\n", resultat[2]); *\/ */
+/*     /\* printf("resultat dans main: %d\n", resultat[3]); *\/ */
+/*     /\* printf("resultat dans main: %d\n", resultat[4]); *\/ */
+/*     /\* printf("resultat dans main: %d\n", resultat[5]); *\/ */
+      
+/*       affichage_plateau(monJeux); */
+   
+/*       resultat[0] = 0; */
+/*       resultat[1] = 0; */
+      
+/*       if(resultat[4] ==1){ */
+/* 	fprintf(stderr, "il y avait un probleme quelque part"); */
+/*       } */
+/*       resultat[4] = 0; */
+/*       resultat[5] = 0; */
+      
+/*     }else{ */
+/*       //si commande n'est pas bon. */
+/*     } */
+/*   } */
+
+/*   return 0; */
+
+/* } */
 
 
 
