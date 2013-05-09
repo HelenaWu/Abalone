@@ -4,38 +4,37 @@
 #include"../def.h"
 #include "mise_a_jour.h"
 #include"verifie_coup.h"
+#include<string.h>
 #include "../Analyse/lecture_fichier.h"
 
 enum direction{NW=1, NE=2, E=3, SE=4, SW=5, W=6, ERR=7};
 
 
-int* verifie_coup(int * resultat, cercle_t * cercles, int direction, jeux_t jeux){
-  //revoie resultat
+void  verifie_coup(int * resultat, cercle_t * cercles, int direction, jeux_t jeux,char joueur_courant){
   
-  printf("entre dans verifie_coup.\n");
-  printf("dir est: %d\n", direction);
-
-    
+  if(cercles[0]->couleur!=joueur_courant){
+    fprintf(stderr,"Vous n'avez le droit de bouger cette bille!\n");
+    return;
+  }
+ 
   if(cercles[0]->etat==0){
-    fprintf(stderr, "c'est vide! reessayez une autre commande!");
-    return 1;
+    fprintf(stderr, "c'est vide! reessayez une autre commande!\n");
+    return;
   }
 
   /*---compter nombre de cercles---*/
   int compteur=0;
   while(cercles[compteur]!=NULL){
+    printf("compteur: %d\n", compteur);
     compteur++;
 
   }
 
-  /*---initialise resultat---*/
-  int i;
-
-  for(i=0; i<6; i++){
-    resultat[i] = 0;
-  }
     
   if(compteur == 1){
+    
+    printf("va commencer recurse_verifie.\n");
+    
     resultat = recurse_verifie(resultat,cercles[0], direction, jeux);
   }
   if(compteur == 3){
@@ -48,8 +47,8 @@ int* verifie_coup(int * resultat, cercle_t * cercles, int direction, jeux_t jeux
     perror("Votre commande n'est pas valide, reessayez.\n");
     //error code?
   }
-  printf("resultat: %d, %d, %d, %d, %d, %d\n", resultat[0],  resultat[1],  resultat[2],  resultat[3], resultat[4], resultat[5]);
-  return resultat;
+  printf("resultat: \n noir en train: %d, blanc en train: %d, noir sortis: %d, blanc sortis: %d, etat prog: %d, etat couleur:%d\n", resultat[0],  resultat[1],  resultat[2],  resultat[3], resultat[4], resultat[5]);
+  return;
 }
 
 
@@ -74,16 +73,7 @@ int * recurse_verifie(int * resultat, cercle_t cercle, int  direction, jeux_t je
     resultat[1]++;
   }
 
-  /*---quelqu'un a gagne---*/
-  if(resultat[2] == 6){
-    printf("felicitation! Blanc a gagne!\n");
-    exit(0);
-  }
-  if(resultat[3]==6){
-    printf("felicitation! Noir a gagne!\n");
-    exit(0);
-  }
-
+ 
   /*---on va depasser le nombre limite de billes a pousser---*/
   if(resultat[0] >=4 || resultat[1] >= 4){
     printf("on va depasser le nombre limite de billes a pousser.\n");
@@ -104,18 +94,15 @@ int * recurse_verifie(int * resultat, cercle_t cercle, int  direction, jeux_t je
   regle_t regle = cercle->regle;
   
   // afficheCercle(cercle);
-  printf("le cas est: %d\n", regle->cas);
-  printf("%c \n", regle->NW);
-  printf("%c \n", regle->NE);
-  printf("%c \n", regle->E);
-  printf("%c \n", regle->SE);
-  printf("%c \n", regle->SW);
-  printf("%c \n", regle->W);
-  printf("/--------------/");  
-
-
-
-
+  /* printf("le nom de cercle; %s\n", cercle->nom); */
+  /* printf("le cas est: %d\n", regle->cas); */
+  /* printf("%c \n", regle->NW); */
+  /* printf("%c \n", regle->NE); */
+  /* printf("%c \n", regle->E); */
+  /* printf("%c \n", regle->SE); */
+  /* printf("%c \n", regle->SW); */
+  /* printf("%c \n", regle->W); */
+  /* printf("/--------------/");   */
 
 
 
@@ -150,14 +137,32 @@ int * recurse_verifie(int * resultat, cercle_t cercle, int  direction, jeux_t je
 
 
 
-    
-    char * nom_prochain = nouvelle_position(cercle->nom, direction);
-    cercle_t bille_prochaine = nom_to_bille(nom_prochain, jeux); 
-    resultat  = recurse_verifie(resultat, bille_prochaine,  direction, jeux);
-
+      
+       char * nom_prochain = nouvelle_position(cercle->nom, direction);
+      
+       
+       cercle_t bille_prochaine = nom_to_bille(nom_prochain, jeux); 
+      
+   
+       resultat  = recurse_verifie(resultat, bille_prochaine,  direction, jeux);
+      
+   
      if(resultat[4] !=1){
+       /* printf("nom de la bille courante: %s\n", cercle->nom); */
+       /* printf("nom de la bille prochaine: %s\n", bille_prochaine->nom); */
        deplace_bille(cercle,bille_prochaine);
-    }
+       /*---quelqu'un a gagne---*/
+       if(resultat[2] == 6){
+	 printf("felicitation! Blanc a gagne!\n");
+	 exit(0);
+       }
+       if(resultat[3]==6){
+	 printf("felicitation! Noir a gagne!\n");
+	 exit(0);
+       }
+
+       
+   }
     
     return resultat;
 
@@ -166,7 +171,8 @@ int * recurse_verifie(int * resultat, cercle_t cercle, int  direction, jeux_t je
 
 char * nouvelle_position(char* nom_courant, int direction){
   //NW=1, NE=2, E=3, SE=4, SW=5, W=6, ERR=7
-  char *nom_prochain = nom_courant;
+  char *nom_prochain  = malloc(sizeof(char) * 20);
+    nom_prochain= strcpy(nom_prochain,nom_courant);
 
   switch(direction){
   case NW:

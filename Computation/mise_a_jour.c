@@ -27,5 +27,7 @@ void deplace_bille(cercle_t c_courant, cercle_t c_prochain){
   
   c_prochain->couleur =  couleur_tmp;
   c_prochain->etat = etat_tmp;
+  
+  // printf("va deplacer bille: %s par %s\n", c_courant->nom, c_prochain->nom);
 
 }
